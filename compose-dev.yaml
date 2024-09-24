@@ -43,12 +43,12 @@ services:
     ports:
       - "9042:9042"
     volumes:
-      - cassandra-data:/bitnami/cassandra
+    - cassandra-data:/bitnami/cassandra
       - ./init-scripts:/docker-entrypoint-initdb.d/
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "cqlsh", "u", "cassandra", "p", "cassandra", "-e", "describe keyspaces"]
+      test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
       interval: 10s
       timeout: 5s
       retries: 5
