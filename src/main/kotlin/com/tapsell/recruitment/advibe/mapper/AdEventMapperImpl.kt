@@ -17,7 +17,7 @@ class AdEventMapperImpl : AdEventMapper {
             appId = impressionEvent.appId,
             appTitle = impressionEvent.appTitle,
             impressionTime = impressionEvent.impressionTime,
-            clickTime = null // Since clickTime is ignored
+            clickTime = null
         )
     }
 

@@ -10,10 +10,4 @@ import org.springframework.data.cassandra.repository.config.EnableReactiveCassan
 @EnableReactiveCassandraRepositories(basePackages = ["com.tapsell.recruitment.advibe.repository"])
 open class CassandraConfig {
 
-//    @Bean
-//    open fun sessionFactoryInitializer(session: CqlSession): KeyspacePopulator {
-//        val populator = ResourceKeyspacePopulator()
-//        populator.setScripts(ClassPathResource("cassandra_config.cql"))
-//        return populator
-//    }
 }

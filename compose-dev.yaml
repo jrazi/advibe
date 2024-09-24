@@ -34,18 +34,21 @@ services:
   cassandra:
     image: bitnami/cassandra:5.0-debian-12
     environment:
-      - CASSANDRA_KEYSPACE=${CASSANDRA_KEYSPACE:-advibe_keyspace}
       - CASSANDRA_CLUSTER_NAME=dev-cassandra-cluster
-      - CASSANDRA_USER=${CASSANDRA_USERNAME:-cassandra}
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_AUTHENTICATOR=AllowAllAuthenticator
+      - CASSANDRA_AUTHORIZER=AllowAllAuthorizer
+      - CASSANDRA_USERNAME=${CASSANDRA_USERNAME:-cassandra}
       - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
     ports:
       - "9042:9042"
     volumes:
       - cassandra-data:/bitnami/cassandra
+      - ./init-scripts:/docker-entrypoint-initdb.d/
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
+      test: ["CMD", "cqlsh", "u", "cassandra", "p", "cassandra", "-e", "describe keyspaces"]
       interval: 10s
       timeout: 5s
       retries: 5
