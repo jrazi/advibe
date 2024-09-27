@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotBlank
 
 data class ClickEventDto(
     @field:NotBlank(message = "Request ID cannot be blank")
-    override val requestId: String,
+    override val requestId: String = "",
 
     @field:NotNull(message = "Click time cannot be null")
     @field:ValidTimestamp
-    val clickTime: Long
+    val clickTime: Long = 0L
 ) : AdEventDto

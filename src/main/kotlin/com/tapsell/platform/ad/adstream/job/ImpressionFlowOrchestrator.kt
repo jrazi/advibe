@@ -33,8 +33,9 @@ class ImpressionFlowOrchestrator {
             publisher.publish(event)
 
             val rand = Random.nextInt()
-            if (rand % 10 == 0) {
+            if (rand % 5 == 0) {
                 val clickEvent = clickEventFactory.createEvent().copy(requestId = event.requestId)
+                publisher.publish(clickEvent)
             }
         }
     }

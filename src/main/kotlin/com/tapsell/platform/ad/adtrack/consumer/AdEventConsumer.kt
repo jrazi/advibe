@@ -14,12 +14,12 @@ class AdEventConsumer {
         private val log: Logger = LoggerFactory.getLogger(AdEventConsumer::class.java)
     }
 
-    @KafkaListener(topics = ["ad-impression-events"], groupId = "advibe-consumer-group")
+    @KafkaListener(topicPattern = "ad-impression-events.*", groupId = "advibe-consumer-group")
     fun listenImpressionEvents(event: ImpressionEventDto) {
         log.debug("Received Impression Event: {}", event)
     }
 
-    @KafkaListener(topics = ["click-events"], groupId = "advibe-consumer-group")
+    @KafkaListener(topicPattern = "ad-click-events.*", groupId = "advibe-consumer-group")
     fun listenClickEvents(event: ClickEventDto) {
         log.debug("Received Click Event {}", event)
     }
