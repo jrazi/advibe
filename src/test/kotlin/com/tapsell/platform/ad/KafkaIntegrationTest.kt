@@ -68,7 +68,7 @@ class KafkaIntegrationTest {
     @Test
     fun givenEmbeddedKafkaBroker_whenSendMessage_thenMessageIsConsumed() {
         val producerRecord = ProducerRecord(KAFKA_TOPIC, "test-key", "test-value")
-        val latch = CountDownLatch(1)
+        val latch = CountDownLatch(2)
         kafkaTemplate.send(producerRecord).thenRunAsync({ latch.countDown() }, { latch.countDown() })
         if (!latch.await(2, TimeUnit.SECONDS)) {
             throw AssertionError("Message was not consumed within the timeout")

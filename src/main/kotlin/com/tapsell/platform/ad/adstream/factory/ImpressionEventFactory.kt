@@ -9,10 +9,10 @@ import java.util.UUID
 import kotlin.random.Random
 
 @Component
-class ImpressionEventFactory {
-    fun createValidImpressionEvent() : ImpressionEventDto {
+class ImpressionEventFactory : EventFactory<ImpressionEventDto> {
+    override fun createEvent() : ImpressionEventDto {
         val impression = ImpressionEventDto(
-            requestId = UUID.randomUUID().toString(),
+            requestId = UUID.randomUUID().toString().substring(2),
             adId = UUID.randomUUID().toString().substring(8),
             adTitle = Locale.IsoCountryCode.values().random().toString() + ' ' + Random.nextLong().toString(8),
             advertiserCost = (Random.nextFloat() * 1_000_000_000L).toDouble(),

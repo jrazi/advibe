@@ -1,10 +1,12 @@
 package com.tapsell.platform.ad.adstream.job
 
+import com.tapsell.platform.ad.adstream.factory.ClickEventFactory
 import com.tapsell.platform.ad.adstream.factory.ImpressionEventFactory
 import com.tapsell.platform.ad.eventbus.KafkaEventPublisher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import kotlin.random.Random
 
 
 /**
@@ -13,7 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class ImpressionFlowOrchestrator {
 
-    val EVENT_COUNT_PER_DISPATCH = 10
+    val EVENT_COUNT_PER_DISPATCH = 2
 
     @Autowired
     private lateinit var publisher : KafkaEventPublisher
@@ -21,11 +23,19 @@ class ImpressionFlowOrchestrator {
     @Autowired
     private lateinit var impressionEventFactory : ImpressionEventFactory
 
-    @Scheduled(fixedRate = 1000)
+    @Autowired
+    private lateinit var clickEventFactory : ClickEventFactory
+
+    @Scheduled(fixedRate = 5000)
     fun dispatchEvents() {
         for (k in 0 until EVENT_COUNT_PER_DISPATCH) {
-            val event = impressionEventFactory.createValidImpressionEvent()
+            val event = impressionEventFactory.createEvent()
             publisher.publish(event)
+
+            val rand = Random.nextInt()
+            if (rand % 10 == 0) {
+                val clickEvent = clickEventFactory.createEvent().copy(requestId = event.requestId)
+            }
         }
     }
 
