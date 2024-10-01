@@ -13,4 +13,5 @@ CREATE TABLE IF NOT EXISTS ad_event
     apptitle       text,
     impressiontime bigint,
     clicktime      bigint
-) WITH bloom_filter_fp_chance = 0.001;
+) WITH bloom_filter_fp_chance = 0.001
+
