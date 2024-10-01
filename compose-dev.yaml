@@ -38,8 +38,10 @@ services:
       - CASSANDRA_DC=datacenter1
       - CASSANDRA_AUTHENTICATOR=AllowAllAuthenticator
       - CASSANDRA_AUTHORIZER=AllowAllAuthorizer
+      - CASSANDRA_ENABLE_REMOTE_CONNECTIONS=true
       - CASSANDRA_USERNAME=${CASSANDRA_USERNAME:-cassandra}
       - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
+
     ports:
       - "9042:9042"
     volumes:
@@ -49,9 +51,9 @@ services:
       - app-network
     healthcheck:
       test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 5s
+      timeout: 2s
+      retries: 100
     restart: unless-stopped
 
 volumes:

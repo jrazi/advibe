@@ -1,17 +1,13 @@
 package com.tapsell.platform.ad.adtrack.mapper
 
-import com.tapsell.platform.ad.contract.dto.ClickEventDto
 import com.tapsell.platform.ad.contract.dto.ImpressionEventDto
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 
-class AdEventMapperTest {
+class ImpressionEventMapperTest {
 
-    private val mapper: AdEventMapper = AdEventMapperImpl()
+    private val mapper = ImpressionEventMapper()
 
-    // Helper to create valid ImpressionEventDto
     private fun createValidImpressionDto() = ImpressionEventDto(
         requestId = "validRequestId",
         adId = "validAdId",
@@ -22,16 +18,9 @@ class AdEventMapperTest {
         impressionTime = 1620000000L
     )
 
-    // Helper to create valid ClickEventDto
-    private fun createValidClickDto() = ClickEventDto(
-        requestId = "validRequestId",
-        clickTime = 1620000500L
-    )
-
     @Test
-    fun givenValidImpressionEventDto_whenMappingToAdEvent_thenAllFieldsMappedCorrectly() {
+    fun `should map ImpressionEventDto to AdEvent correctly`() {
         val impressionDto = createValidImpressionDto()
-
         val adEvent = mapper.toDomain(impressionDto)
 
         assertNotNull(adEvent)
@@ -42,35 +31,32 @@ class AdEventMapperTest {
         assertEquals(impressionDto.appId, adEvent.appId)
         assertEquals(impressionDto.appTitle, adEvent.appTitle)
         assertEquals(impressionDto.impressionTime, adEvent.impressionTime)
-        assertNull(adEvent.clickTime) // clickTime should not be set
+        assertNull(adEvent.clickTime, "Expected clickTime to be null")
     }
 
     @Test
-    fun givenValidClickEventDto_whenUpdatingExistingAdEvent_thenOnlyClickTimeIsUpdated() {
+    fun `should update existing AdEvent with ImpressionEventDto fields correctly`() {
         val impressionDto = createValidImpressionDto()
-        var adEvent = mapper.toDomain(impressionDto)
-        val clickDto = createValidClickDto()
+        var adEvent = mapper.toDomain(impressionDto).copy(clickTime = 1620000500L)
 
-        adEvent = mapper.updateFromClick(clickDto, adEvent)
+        adEvent = mapper.updateFromDto(impressionDto, adEvent)
 
         assertNotNull(adEvent)
         assertEquals(impressionDto.requestId, adEvent.requestId)
-        assertEquals(impressionDto.adId, adEvent.adId) // Ensure impression fields are preserved
+        assertEquals(impressionDto.adId, adEvent.adId)
         assertEquals(impressionDto.adTitle, adEvent.adTitle)
         assertEquals(impressionDto.advertiserCost, adEvent.advertiserCost)
         assertEquals(impressionDto.appId, adEvent.appId)
         assertEquals(impressionDto.appTitle, adEvent.appTitle)
         assertEquals(impressionDto.impressionTime, adEvent.impressionTime)
-        assertEquals(clickDto.clickTime, adEvent.clickTime) // clickTime should be updated
+        assertEquals(1620000500L, adEvent.clickTime, "Expected clickTime to remain unchanged")
     }
 
     @Test
-    fun givenExtremeAdvertiserCostInImpressionDto_whenMapping_thenFieldMappedCorrectly() {
-        val impressionDto = createValidImpressionDto().copy(advertiserCost = Double.MAX_VALUE/100)
-
+    fun `should handle large advertiserCost in ImpressionEventDto`() {
+        val impressionDto = createValidImpressionDto().copy(advertiserCost = Double.MAX_VALUE / 100)
         val adEvent = mapper.toDomain(impressionDto)
 
-        assertEquals(Double.MAX_VALUE/100, adEvent.advertiserCost)
+        assertEquals(Double.MAX_VALUE / 100, adEvent.advertiserCost)
     }
-
 }

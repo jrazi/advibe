@@ -9,12 +9,13 @@ import org.springframework.data.cassandra.core.mapping.Table
 import org.springframework.data.cassandra.core.query.Criteria
 import org.springframework.data.cassandra.core.query.Query
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS
 import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_CLASS
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
 @DataCassandraTest
-@DirtiesContext(classMode = BEFORE_CLASS)
+@DirtiesContext(classMode = AFTER_CLASS)
 class CassandraIntegrationTest {
 
     @Autowired
