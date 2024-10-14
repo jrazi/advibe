@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  AdVibe:
+    image: advibe
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - kafka
+      - cassandra
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:cassandra://${CASSANDRA_HOST}:${CASSANDRA_PORT}/keyspace_name
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_HOST}:${KAFKA_PORT}
+      JAVA_OPTS: "-Xms512m -Xmx1024m"
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - app_data:/app/data
+    restart: always
+    networks:
+      - advibe-network
+
+  kafka:
+    image: bitnami/kafka:3.3-debian-12
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    restart: unless-stopped
+    networks:
+      - advibe-network
+
+  cassandra:
+    image: bitnami/cassandra:5.0-debian-12
+    environment:
+      - CASSANDRA_CLUSTER_NAME=advibe-cluster
+      - CASSANDRA_NUM_TOKENS=256
+      - CASSANDRA_SEEDS=cassandra
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/bitnami/cassandra
+    restart: unless-stopped
+    networks:
+      - advibe-network
+
+networks:
+  advibe-network:
+    driver: bridge
+
+volumes:
+  app_data:
+    driver: local
+  kafka_data:
+    driver: local
+  cassandra_data:
+    driver: local
