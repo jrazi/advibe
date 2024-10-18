@@ -1,13 +1,12 @@
 package com.tapsell.recruitment.advibe.infra
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.stereotype.Service
-import java.io.Serializable
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class KafkaEventPublisher(
-    private val kafkaTemplate: KafkaTemplate<String, String>
+    private val kafkaTemplate: KafkaTemplate<String, AdEventDto>,
 ) {
-    fun publish(event: ImpressionEvent) {
-        kafkaTemplate.send("ad-impression-events", event.requestId, event.toString())
+    fun publish(event: AdEventDto) {
+        kafkaTemplate.send("ad-impression-events", event.requestId, event)
     }
 }
