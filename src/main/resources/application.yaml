@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: advibe
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  main:
+    banner-mode: "console"
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    topics:
+      ad-impression-events: add_impression_events
+      ad-click-events: ad_click_events
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:advibe-consumer-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  cassandra:
+    contact-points: ${CASSANDRA_CONTACT_POINTS:127.0.0.1}
+    port: ${CASSANDRA_PORT:9042}
+    keyspace-name: ${CASSANDRA_KEYSPACE:advibe_keyspace}
+    username: ${CASSANDRA_USERNAME:cassandra}
+    password: ${CASSANDRA_PASSWORD:cassandra}
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  health:
+    cassandra:
+      enabled: true
+    kafka:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.tapsell.recruitment: DEBUG

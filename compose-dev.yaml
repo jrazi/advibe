@@ -1,35 +1,14 @@
 services:
-  app:
-    image: advibe:latest
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
-      - CASSANDRA_CONTACT_POINTS=${CASSANDRA_CONTACT_POINTS:-cassandra}
-      - CASSANDRA_PORT=${CASSANDRA_PORT:-9042}
-      - CASSANDRA_KEYSPACE=${CASSANDRA_KEYSPACE:-advibe_keyspace}
-      - CASSANDRA_USERNAME=${CASSANDRA_USERNAME:-cassandra}
-      - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
-    depends_on:
-      kafka:
-        condition: service_healthy
-      cassandra:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - app-network
-    ports:
-      - "8080:8080"
-
   zookeeper:
     image: bitnami/zookeeper:3.9-debian-12
     ports:
       - "2181:2181"
+    networks:
+      - app-network
     environment:
       - ZOO_ENABLE_AUTH=yes
       - ZOO_SERVER_ID=1
       - ZOO_SERVERS=zookeeper:2888:3888
-    networks:
-      - app-network
-
   kafka:
     image: bitnami/kafka:3.3-debian-12
     environment:
@@ -56,8 +35,8 @@ services:
     image: bitnami/cassandra:5.0-debian-12
     environment:
       - CASSANDRA_KEYSPACE=${CASSANDRA_KEYSPACE:-advibe_keyspace}
-      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
-      - CASSANDRA_USERNAME=${CASSANDRA_USERNAME:-cassandra}
+      - CASSANDRA_CLUSTER_NAME=dev-cassandra-cluster
+      - CASSANDRA_USER=${CASSANDRA_USERNAME:-cassandra}
       - CASSANDRA_PASSWORD=${CASSANDRA_PASSWORD:-cassandra}
     ports:
       - "9042:9042"
@@ -66,7 +45,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "cqlsh", "-u", "${CASSANDRA_USERNAME:-cassandra}", "-p", "${CASSANDRA_PASSWORD:-cassandra}", "-e", "describe keyspaces"]
+      test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
       interval: 10s
       timeout: 5s
       retries: 5

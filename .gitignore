@@ -41,3 +41,8 @@ build/
 .env.prod
 .env.stg
 /.mvn/
+
+### OS X ###
+.DS_Store
+.AppleDouble
+
