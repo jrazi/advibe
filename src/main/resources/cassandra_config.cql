@@ -1,0 +1,24 @@
+CREATE KEYSPACE IF NOT EXISTS advibe WITH REPLICATION = {
+  'class': 'NetworkTopologyStrategy',
+  'datacenter1': 3
+};
+
+USE advibe;
+
+CREATE TABLE IF NOT EXISTS ad_event (
+    requestId text PRIMARY KEY,
+    ad_id text,
+    ad_title text,
+    advertiser_cost double,
+    app_id text,
+    app_title text,
+    impression_time bigint,
+    click_time bigint
+)
+WITH bloom_filter_fp_chance = 0.01  -- So that we have fewer false positive
+AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'} -- caching!
+AND compaction = {'class': 'LeveledCompactionStrategy'} -- Since the job is read heavy, this would be the optimal strategy 
+AND gc_grace_seconds = 86400; -- Set the GC grace period for tombstones (deleted records) to 1 day
+
+CREATE INDEX IF NOT EXISTS ON ad_event (ad_id);
+CREATE INDEX IF NOT EXISTS ON ad_event (impression_time);
