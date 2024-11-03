@@ -1,8 +1,10 @@
 package com.tapsell.platform.ad.adstream.job
 
 import com.tapsell.platform.ad.adstream.ctr.AdInteractionModelingProperties
+import com.tapsell.platform.ad.adstream.ctr.AdInteractionPublishingProperties
 import com.tapsell.platform.ad.adstream.ctr.AdStoryMaker
 import com.tapsell.platform.ad.eventbus.KafkaEventPublisher
+import org.springframework.context.annotation.PropertySource
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -10,18 +12,18 @@ import org.springframework.stereotype.Component
  * Runs a job every 5 seconds to create and publish configured events.
  */
 @Component
+@PropertySource("classpath:application.yaml")
 class ImpressionFlowOrchestrator(
     private val publisher: KafkaEventPublisher,
-    private val adStoryMaker: AdStoryMaker
+    private val adStoryMaker: AdStoryMaker,
+    private val publishingProps: AdInteractionPublishingProperties
 ) {
 
-    companion object {
-        private const val EVENT_COUNT_PER_DISPATCH = 2
-    }
-
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(
+        fixedRateString = "\${ad-interaction.publishing.eventDispatchScheduleRunningIntervalMillis}"
+    )
     fun dispatchEvents() {
-        repeat(EVENT_COUNT_PER_DISPATCH) {
+        repeat(publishingProps.eventScheduledForDispatchCount) {
             val interactionStory = adStoryMaker.createInteractionStory()
 
             publisher.publish(interactionStory.impression)

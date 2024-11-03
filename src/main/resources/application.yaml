@@ -65,3 +65,6 @@ ad-interaction:
     clickTimeScale: 6000           # Scale parameter for Weibull distribution
     impressionArrivalRatio: 0.85   # Ratio for impression delivery
     clickArrivalRatio: 0.75        # Ratio for click delivery
+  publishing:
+    eventDispatchScheduleRunningIntervalMillis: 1000
+    eventScheduledForDispatchCount: 10
