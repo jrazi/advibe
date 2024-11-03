@@ -1,5 +1,5 @@
 # Stage 1: Build the application using Maven
-FROM maven:3.9.9-amazoncorretto-21 AS builder
+FROM docker.arvancloud.ir/maven:3.9.9-amazoncorretto-21 AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Stage 2: Use a lightweight alpine JRE as the final base image
-FROM amazoncorretto:21-alpine
+FROM docker.arvancloud.ir/amazoncorretto:21-alpine
 
 ENV SPRING_OUTPUT_ANSI_ENABLED=ALWAYS \
     JAVA_OPTS="-Xms512m -Xmx1024m" \

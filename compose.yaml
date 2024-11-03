@@ -1,6 +1,9 @@
 services:
   app:
-    image: advibe:latest
+    image: advibe:${APP_VERSION}
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       - CASSANDRA_CONTACT_POINTS=${CASSANDRA_CONTACT_POINTS:-cassandra}
