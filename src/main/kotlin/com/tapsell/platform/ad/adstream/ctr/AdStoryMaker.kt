@@ -3,6 +3,8 @@ package com.tapsell.platform.ad.adstream.ctr
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
 import com.tapsell.platform.ad.contract.dto.ImpressionEventDto
 import com.tapsell.platform.ad.adstream.factory.ClickEventFactory
+import com.tapsell.platform.ad.adstream.factory.ImpressionEventFactory
+import org.springframework.stereotype.Component
 import java.time.Instant
 
 interface AdInteractionStoryFactory {
@@ -10,6 +12,8 @@ interface AdInteractionStoryFactory {
 }
 
 class StrategyBasedAdInteractionStoryFactory(
+    private val clickFactory: ClickEventFactory,
+    private val impressionFactory: ImpressionEventFactory,
     private val clickStrategy: UserClickDecisionStrategy,
     private val clickTimeStrategy: UserClickTimeStrategy,
     private val impressionFateStrategy: LetterFateStrategy,
@@ -24,18 +28,21 @@ class StrategyBasedAdInteractionStoryFactory(
         val isClickDeadLetter = !clickFateStrategy.willBeArrived()
 
         return AdInteractionStory(
-            impression = ImpressionEventDto(),  // Replace with real impression instance
-            click = ClickEventFactory(),        // Replace with real click factory instance
+            impression = impressionFactory.createEvent(),  // Replace with real impression instance
+            click = clickFactory.createEvent(),        // Replace with real click factory instance
             impressionPublishTime = baseTimeForLetterPublish,
             clickPublishTime = clickTime ?: baseTimeForLetterPublish,
             isImpressionDeadLetter = isImpressionDeadLetter,
-            clickDeadLetter = isClickDeadLetter
+            isClickDeadLetter = isClickDeadLetter
         )
     }
 }
 
+@Component
 class AdStoryMaker(
-    private val props: AdInteractionModelingProperties
+    private val props: AdInteractionModelingProperties,
+    private val clickFactory: ClickEventFactory,
+    private val impressionFactory: ImpressionEventFactory
 ) : AdInteractionStoryFactory {
 
     override fun createInteractionStory(): AdInteractionStory {
@@ -48,7 +55,9 @@ class AdStoryMaker(
             clickTimeStrategy = clickTimeStrategy,
             impressionFateStrategy = impressionFateStrategy,
             clickFateStrategy = clickFateStrategy,
-            baseTimeForLetterPublish = Instant.now()
+            baseTimeForLetterPublish = Instant.now(),
+            clickFactory = clickFactory,
+            impressionFactory = impressionFactory
         )
 
         return baseFactory.createInteractionStory()

@@ -1,47 +1,36 @@
 package com.tapsell.platform.ad.adstream.job
 
 import com.tapsell.platform.ad.adstream.ctr.AdInteractionModelingProperties
-import com.tapsell.platform.ad.adstream.factory.ClickEventFactory
-import com.tapsell.platform.ad.adstream.factory.ImpressionEventFactory
+import com.tapsell.platform.ad.adstream.ctr.AdStoryMaker
 import com.tapsell.platform.ad.eventbus.KafkaEventPublisher
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import kotlin.random.Random
-
 
 /**
- * Currently, runs a job every second, to create and publish K events.
+ * Runs a job every 5 seconds to create and publish configured events.
  */
 @Component
-class ImpressionFlowOrchestrator {
+class ImpressionFlowOrchestrator(
+    private val publisher: KafkaEventPublisher,
+    private val adStoryMaker: AdStoryMaker
+) {
 
-    val EVENT_COUNT_PER_DISPATCH = 2
-
-    @Autowired
-    private lateinit var publisher : KafkaEventPublisher
-
-    @Autowired
-    private lateinit var impressionEventFactory : ImpressionEventFactory
-
-    @Autowired
-    private lateinit var clickEventFactory : ClickEventFactory
-
-    @Autowired
-    private lateinit var props: AdInteractionModelingProperties
+    companion object {
+        private const val EVENT_COUNT_PER_DISPATCH = 2
+    }
 
     @Scheduled(fixedRate = 5000)
     fun dispatchEvents() {
-        for (k in 0 until EVENT_COUNT_PER_DISPATCH) {
-            val event = impressionEventFactory.createEvent()
-            publisher.publish(event)
+        repeat(EVENT_COUNT_PER_DISPATCH) {
+            val interactionStory = adStoryMaker.createInteractionStory()
 
-            val rand = Random.nextInt()
-            if (rand % 5 == 0) {
-                val clickEvent = clickEventFactory.createEvent().copy(requestId = event.requestId)
-                publisher.publish(clickEvent)
+            publisher.publish(interactionStory.impression)
+
+            interactionStory.click.let { clickEvent ->
+                if (interactionStory.isClickDeadLetter.not()) {
+                    publisher.publish(clickEvent)
+                }
             }
         }
     }
-
 }
