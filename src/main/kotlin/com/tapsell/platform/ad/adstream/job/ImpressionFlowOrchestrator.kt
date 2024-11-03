@@ -2,7 +2,7 @@ package com.tapsell.platform.ad.adstream.job
 
 import com.tapsell.platform.ad.adstream.ctr.AdInteractionModelingProperties
 import com.tapsell.platform.ad.adstream.ctr.AdInteractionPublishingProperties
-import com.tapsell.platform.ad.adstream.ctr.AdStoryMaker
+import com.tapsell.platform.ad.adstream.ctr.AdInteractionStoryFactory
 import com.tapsell.platform.ad.eventbus.KafkaEventPublisher
 import org.springframework.context.annotation.PropertySource
 import org.springframework.scheduling.annotation.Scheduled
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 @PropertySource("classpath:application.yaml")
 class ImpressionFlowOrchestrator(
-    private val storyMaker: AdStoryMaker,
+    private val storyMaker: AdInteractionStoryFactory,
     private val eventScheduler: AdStoryEventScheduler,
     private val properties: AdInteractionPublishingProperties
 ) {

@@ -1,7 +1,6 @@
 package com.tapsell.platform.ad.adstream.ctr
 
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
-import com.tapsell.platform.ad.contract.dto.ImpressionEventDto
 import com.tapsell.platform.ad.adstream.factory.ClickEventFactory
 import com.tapsell.platform.ad.adstream.factory.ImpressionEventFactory
 import org.springframework.stereotype.Component
@@ -39,7 +38,7 @@ class StrategyBasedAdInteractionStoryFactory(
 }
 
 @Component
-class AdStoryMaker(
+class PropsBasedAdInteractionStoryFactory(
     private val props: AdInteractionModelingProperties,
     private val clickFactory: ClickEventFactory,
     private val impressionFactory: ImpressionEventFactory
