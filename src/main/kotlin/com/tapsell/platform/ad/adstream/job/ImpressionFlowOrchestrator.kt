@@ -14,25 +14,18 @@ import org.springframework.stereotype.Component
 @Component
 @PropertySource("classpath:application.yaml")
 class ImpressionFlowOrchestrator(
-    private val publisher: KafkaEventPublisher,
-    private val adStoryMaker: AdStoryMaker,
-    private val publishingProps: AdInteractionPublishingProperties
+    private val storyMaker: AdStoryMaker,
+    private val eventScheduler: AdStoryEventScheduler,
+    private val properties: AdInteractionPublishingProperties
 ) {
 
     @Scheduled(
         fixedRateString = "\${ad-interaction.publishing.eventDispatchScheduleRunningIntervalMillis}"
     )
-    fun dispatchEvents() {
-        repeat(publishingProps.eventScheduledForDispatchCount) {
-            val interactionStory = adStoryMaker.createInteractionStory()
-
-            publisher.publish(interactionStory.impression)
-
-            interactionStory.click.let { clickEvent ->
-                if (interactionStory.isClickDeadLetter.not()) {
-                    publisher.publish(clickEvent)
-                }
-            }
+    fun scheduleNextBatchOfInteractions() {
+        repeat(properties.eventScheduledForDispatchCount) {
+            val story = storyMaker.createInteractionStory()
+            eventScheduler.scheduleEventsForStory(story)
         }
     }
 }
