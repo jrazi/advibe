@@ -1,4 +1,4 @@
-package com.tapsell.platform.ad.adstream.factory
+package com.tapsell.platform.ad.adstream.interaction.factory
 
 import com.kenai.jffi.Platform
 import com.tapsell.platform.ad.contract.dto.ImpressionEventDto

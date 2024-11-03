@@ -1,8 +1,13 @@
-package com.tapsell.platform.ad.adstream.ctr
+package com.tapsell.platform.ad.adstream.interaction.factory
 
+import com.tapsell.platform.ad.adstream.interaction.strategy.LetterFateStrategy
+import com.tapsell.platform.ad.adstream.interaction.strategy.StaticCTRBehaviorStrategy
+import com.tapsell.platform.ad.adstream.interaction.strategy.StaticRatioLetterFateStrategy
+import com.tapsell.platform.ad.adstream.interaction.strategy.UserClickDecisionStrategy
+import com.tapsell.platform.ad.adstream.interaction.strategy.UserClickTimeStrategy
+import com.tapsell.platform.ad.adstream.interaction.strategy.WeibullClickBehaviorStrategy
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
-import com.tapsell.platform.ad.adstream.factory.ClickEventFactory
-import com.tapsell.platform.ad.adstream.factory.ImpressionEventFactory
+import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionModelingProperties
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -46,7 +51,8 @@ class PropsBasedAdInteractionStoryFactory(
 
     override fun createInteractionStory(): AdInteractionStory {
         val clickStrategy = StaticCTRBehaviorStrategy(props.clickThroughRate)
-        val clickTimeStrategy = WeibullClickBehaviorStrategy(props.meanClickTime.toDouble(), props.clickTimeShape, props.clickTimeScale)
+        val clickTimeStrategy =
+            WeibullClickBehaviorStrategy(props.meanClickTime.toDouble(), props.clickTimeShape, props.clickTimeScale)
         val impressionFateStrategy = StaticRatioLetterFateStrategy(props.impressionArrivalRatio)
         val clickFateStrategy = StaticRatioLetterFateStrategy(props.clickArrivalRatio)
         val baseFactory = StrategyBasedAdInteractionStoryFactory(

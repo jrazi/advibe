@@ -43,12 +43,16 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: "*"
   health:
-    cassandra:
-      enabled: true
     kafka:
       enabled: true
+    cassandra:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 logging:
   level:

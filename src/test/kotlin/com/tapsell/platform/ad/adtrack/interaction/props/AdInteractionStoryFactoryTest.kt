@@ -1,19 +1,19 @@
-package com.tapsell.platform.ad.adstream.ctr
+package com.tapsell.platform.ad.adstream.interaction
 
+import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionModelingProperties
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import kotlin.test.assertNotNull
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 @SpringBootTest
 @EnableConfigurationProperties(AdInteractionModelingProperties::class)
-class AdStoryMakerTest(
+class AdInteractionStoryFactoryTest(
     @Autowired private val props: AdInteractionModelingProperties
 ) {
 

@@ -1,9 +1,7 @@
 package com.tapsell.platform.ad.adstream.job
 
-import com.tapsell.platform.ad.adstream.ctr.AdInteractionModelingProperties
-import com.tapsell.platform.ad.adstream.ctr.AdInteractionPublishingProperties
-import com.tapsell.platform.ad.adstream.ctr.AdInteractionStoryFactory
-import com.tapsell.platform.ad.eventbus.KafkaEventPublisher
+import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionPublishingProperties
+import com.tapsell.platform.ad.adstream.interaction.factory.AdInteractionStoryFactory
 import org.springframework.context.annotation.PropertySource
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component

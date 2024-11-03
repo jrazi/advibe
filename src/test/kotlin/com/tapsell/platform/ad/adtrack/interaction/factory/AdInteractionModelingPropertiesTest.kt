@@ -1,9 +1,8 @@
-package com.tapsell.platform.ad.adtrack.ctr
+package com.tapsell.platform.ad.adtrack.interaction.factory
 
-import com.tapsell.platform.ad.adstream.ctr.AdInteractionModelingProperties
+import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionModelingProperties
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.test.assertTrue

@@ -1,6 +1,7 @@
-package com.tapsell.platform.ad.adstream.ctr
+package com.tapsell.platform.ad.adstream.interaction.strategy
 
 import java.util.Random
+import kotlin.math.ln
 import kotlin.math.pow
 
 
@@ -62,7 +63,7 @@ class WeibullClickBehaviorStrategy(
     override fun howMillisLaterWillUserClick(): Int {
         val u = kotlin.random.Random.nextDouble()
         // Weibull inverse CDF formula: F^(-1)(u) = λ * (-ln(1-u))^(1/k)
-        val timeMillis = (scale * (-kotlin.math.ln(1 - u)).pow(1.0 / shape)).toLong()
+        val timeMillis = (scale * (-ln(1 - u)).pow(1.0 / shape)).toLong()
         return timeMillis.toInt()
     }
 }

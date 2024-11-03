@@ -1,4 +1,4 @@
-package com.tapsell.platform.ad.adstream.factory
+package com.tapsell.platform.ad.adstream.interaction.factory
 
 import com.tapsell.platform.ad.contract.dto.ClickEventDto
 import org.springframework.stereotype.Component

@@ -1,7 +1,6 @@
-package com.tapsell.platform.ad.adstream.ctr
+package com.tapsell.platform.ad.adstream.interaction.props
 
 import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.PropertySource
 
 
