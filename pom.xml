@@ -23,6 +23,7 @@
         <spring-cloud.version>2023.0.3</spring-cloud.version>
         <spring-modulith.version>1.2.4</spring-modulith.version>
         <jakarta.validation.version>3.1.0</jakarta.validation.version>
+        <spring-boot.version>3.2.4</spring-boot.version>
         <spring.kafka.version>3.2.4</spring.kafka.version>
         <junit.jupiter.version>5.11.2</junit.jupiter.version>
         <mockito.version>5.14.2</mockito.version>
@@ -54,6 +55,12 @@
             <artifactId>jakarta.validation-api</artifactId>
             <version>${jakarta.validation.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
+
         <!-- Kotlin dependencies -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>

@@ -54,3 +54,14 @@ logging:
   level:
     root: INFO
     org.springframework: INFO
+
+
+ad-interaction:
+  modeling:
+    clickThroughRate: 70           # Percentage chance a user clicks an ad
+    meanClickTime: 5000            # Average time in milliseconds before a user clicks
+    stdClickTime: 1500             # Standard deviation of click time in milliseconds
+    clickTimeShape: 1.5            # Shape parameter for Weibull distribution
+    clickTimeScale: 6000           # Scale parameter for Weibull distribution
+    impressionArrivalRatio: 0.85   # Ratio for impression delivery
+    clickArrivalRatio: 0.75        # Ratio for click delivery

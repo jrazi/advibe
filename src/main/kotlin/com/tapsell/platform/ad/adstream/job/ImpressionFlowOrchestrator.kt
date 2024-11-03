@@ -1,5 +1,6 @@
 package com.tapsell.platform.ad.adstream.job
 
+import com.tapsell.platform.ad.adstream.ctr.AdInteractionModelingProperties
 import com.tapsell.platform.ad.adstream.factory.ClickEventFactory
 import com.tapsell.platform.ad.adstream.factory.ImpressionEventFactory
 import com.tapsell.platform.ad.eventbus.KafkaEventPublisher
@@ -25,6 +26,9 @@ class ImpressionFlowOrchestrator {
 
     @Autowired
     private lateinit var clickEventFactory : ClickEventFactory
+
+    @Autowired
+    private lateinit var props: AdInteractionModelingProperties
 
     @Scheduled(fixedRate = 5000)
     fun dispatchEvents() {
