@@ -1,4 +1,4 @@
-package com.tapsell.platform.ad.adtrack.config
+package com.tapsell.platform.ad.adstream.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -1,4 +1,4 @@
-package com.tapsell.platform.ad.adstream.job
+package com.tapsell.platform.ad.adstream
 
 import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionPublishingProperties
 import com.tapsell.platform.ad.adstream.interaction.factory.AdInteractionStoryFactory

@@ -56,8 +56,36 @@ services:
       retries: 100
     restart: unless-stopped
 
+  prometheus:
+    image: bitnami/prometheus:2.55.0-debian-12-r1
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "9090:9090"  # Expose Prometheus UI
+    networks:
+      - app-network
+    depends_on:
+      - cassandra
+
+  grafana:
+    image: bitnami/grafana:11.3.0-debian-12-r2
+    ports:
+      - "3000:3000"  # Expose Grafana UI
+    networks:
+      - app-network
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+
 volumes:
   cassandra-data:
+  grafana-data:
 
 networks:
   app-network:

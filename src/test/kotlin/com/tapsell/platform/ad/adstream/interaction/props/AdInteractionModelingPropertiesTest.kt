@@ -1,4 +1,4 @@
-package com.tapsell.platform.ad.adtrack.interaction.factory
+package com.tapsell.platform.ad.adstream.interaction.props
 
 import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionModelingProperties
 import org.junit.jupiter.api.Assertions.assertNotNull

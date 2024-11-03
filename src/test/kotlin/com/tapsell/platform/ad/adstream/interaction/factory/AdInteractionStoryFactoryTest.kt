@@ -1,5 +1,6 @@
 package com.tapsell.platform.ad.adstream.interaction
 
+import com.tapsell.platform.ad.adstream.interaction.factory.AdInteractionStoryFactory
 import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionModelingProperties
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
 import org.junit.jupiter.api.Test
@@ -14,10 +15,9 @@ import kotlin.test.assertTrue
 @SpringBootTest
 @EnableConfigurationProperties(AdInteractionModelingProperties::class)
 class AdInteractionStoryFactoryTest(
-    @Autowired private val props: AdInteractionModelingProperties
+    @Autowired private val props: AdInteractionModelingProperties,
+    @Autowired private val adStoryMaker: AdInteractionStoryFactory
 ) {
-
-    private val adStoryMaker: AdStoryMaker by lazy { AdStoryMaker(props) }
 
     @Test
     fun `given AdStoryMaker when creating interaction story then story has valid properties`() {
@@ -37,7 +37,7 @@ class AdInteractionStoryFactoryTest(
             "Click publish time should follow impression publish time")
 
         assertTrue(story.isImpressionDeadLetter || !story.isImpressionDeadLetter)
-        assertTrue(story.clickDeadLetter || !story.clickDeadLetter)
+        assertTrue(story.isClickDeadLetter || !story.isClickDeadLetter)
     }
 
     @Test
