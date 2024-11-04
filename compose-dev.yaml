@@ -46,7 +46,11 @@ services:
       - "9042:9042"
     volumes:
     - cassandra-data:/bitnami/cassandra
-    - ./init-scripts:/docker-entrypoint-initdb.d/
+    - ./init-cassandra:/docker-entrypoint-initdb.d/
+#    - ./init-cassandra/cassandra.yaml:/opt/bitnami/cassandra/conf/cassandra.yaml
+#     This above line, causes cassandra container to crash because it is appearantly too
+#     'busy' to mount a simple config file, and at this point I'm too burned out
+#     to see why and explore alternative approaches.
     networks:
       - app-network
     healthcheck:
@@ -54,7 +58,6 @@ services:
       interval: 5s
       timeout: 2s
       retries: 100
-    restart: unless-stopped
 
 volumes:
   cassandra-data:

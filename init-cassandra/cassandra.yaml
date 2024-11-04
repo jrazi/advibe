@@ -1,0 +1,30 @@
+cluster_name: 'AdVibeCluster'  # TO ensure isolation from other clusters, maintaining data integrity and preventing unintended node joins.
+
+partitioner: org.apache.cassandra.dht.Murmur3Partitioner  # Using Murmur3Partitioner provides a balanced data distribution, which is essential for handling AdVibe's high-throughput requirements efficiently.
+
+num_tokens: 256  # Allocating 256 virtual nodes per physical node enhances data distribution granularity, improving load balancing and fault tolerance for real-time event processing.
+
+data_file_directories:
+  - /var/lib/cassandra/data  # Storing data in '/var/lib/cassandra/data' allows for organized data management and can be expanded with additional directories to distribute I/O load across multiple disks.
+
+commitlog_directory: /var/lib/cassandra/commitlog  # Separating commit logs from data files reduces I/O contention, enhancing write performance and ensuring reliable data persistence for high-frequency writes.
+
+memtable_heap_space: 4096MiB  # Allocating 4GB to memtables enables Cassandra to buffer more write operations in memory before flushing to disk, supporting AdVibe's high write throughput and low latency needs.
+
+concurrent_reads: 64  # Setting concurrent_reads to 64 allows Cassandra to handle a large number of simultaneous read requests, ensuring quick data retrieval for real-time processing.
+
+concurrent_writes: 64  # Configuring concurrent_writes to 64 supports AdVibe's high volume of incoming write operations, maintaining efficient data ingestion from Kafka streams.
+
+commitlog_sync: periodic  # Choosing 'periodic' commit log synchronization strikes a balance between data durability and write performance, ensuring data is regularly persisted without introducing significant latency.
+
+commitlog_sync_period: 10000ms  # Setting the commit log sync period to 10 seconds provides a reasonable interval for data persistence, minimizing potential data loss while maintaining high write throughput.
+
+read_request_timeout: 5000ms  # A 5-second timeout for read requests ensures that AdVibe's real-time queries remain responsive, preventing clients from waiting too long for data retrieval.
+
+write_request_timeout: 2000ms  # A 2-second timeout for write requests guarantees that high-volume write operations do not stall, maintaining the smooth ingestion of ad impressions and clicks.
+
+concurrent_compactors: 4  # Allowing 4 concurrent compaction tasks ensures that SSTable compactions are handled efficiently without overwhelming system resources, sustaining optimal performance under heavy write loads.
+
+compaction_throughput: 128MiB/s  # Setting compaction throughput to 128MiB/s ensures that compactions keep up with data ingestion rates, preventing SSTable accumulation and maintaining disk usage efficiency.
+
+key_cache_size: 100MiB  # Allocating 100MiB to the key cache improves read performance by storing frequently accessed keys in memory, reducing disk I/O and speeding up real-time data access.

@@ -1,6 +1,8 @@
 # AdVibe Cassandra Configuration Guide
 
-In designing AdVibe’s data infrastructure, we aim to support a high-availability, write-intensive workload for a platform that demands both scalability and resilience. Our choice of Cassandra as the distributed database system reflects our need for a fault-tolerant, horizontally scalable setup. This document breaks down each configuration decision, along with the technical and operational justifications, to guide both the initial deployment and future adjustments.
+This document outlines the **desired** configuration for Cassandra in the AdVibe environment. It's important to note that due to an issue with mounting the `cassandra.yaml` file, the configurations specified here are not currently active in the deployed Cassandra instance. This guide serves as a blueprint for achieving optimal performance, scalability, and reliability once the configuration issues are resolved.
+
+In designing AdVibe’s data infrastructure, the focus is on supporting a high-availability, write-intensive workload essential for a platform that demands both scalability and resilience. Cassandra was chosen as the distributed database system to meet these needs, offering fault tolerance and horizontal scalability. Below, each configuration decision is explained to provide clarity on the reasoning behind the settings and their impact on the application.
 
 ---
 
@@ -8,219 +10,189 @@ In designing AdVibe’s data infrastructure, we aim to support a high-availabili
 
 ### Replication Strategy: `SimpleStrategy` with `replication_factor = 3`
 
-#### Decision
+**Why this configuration was chosen:**
 
-We selected `SimpleStrategy` with a replication factor of 3 for our single data center.
+Using `SimpleStrategy` with a replication factor of 3 ensures that each piece of data is duplicated across three different nodes within the same data center. This setup provides a solid foundation for data redundancy and availability, safeguarding against node failures without the complexity of multi-data center management.
 
-#### Rationale
+**How it affects the application:**
 
-1. **High Availability**: By replicating data across three nodes, we ensure resilience in case of node failures, enabling read and write availability despite potential disruptions.
-2. **Simplified Setup**: `SimpleStrategy` is optimal for single data center configurations, keeping configuration manageable for development and initial production phases.
-
-#### Future Considerations
-
-- **Multi-Data Center Expansion**: If we expand to multiple data centers, we’ll switch to `NetworkTopologyStrategy`, allowing more control over replication across regions.
-- **Consistency Levels**: With three replicas, we can leverage `LOCAL_QUORUM` for a balance between consistency and availability, accommodating eventual consistency needs while keeping read latencies low.
+A replication factor of 3 strikes a balance between data safety and resource usage. It guarantees that even if two nodes go down simultaneously, the data remains accessible from the third replica. This is crucial for AdVibe’s real-time processing, where uninterrupted access to ad impressions and clicks is necessary to maintain seamless user experiences and accurate analytics.
 
 ---
 
 ## Table Schema Design
 
-1. **Primary Key Choice**: Using `requestid` as the primary key ensures that each record remains unique and enables efficient data access patterns, such as querying for a specific event.
-2. **Data Distribution**: The use of `requestid` as a partition key distributes records evenly, avoiding hotspots in the cluster and enabling consistent read/write throughput.
+### Primary Key and Partitioning
 
-#### Considerations
+**Why this configuration was chosen:**
 
-- **Query Patterns**: If future queries demand filtering by `adid` or `appid`, clustering columns or secondary indexes may be required.
-- **Time-Based Queries**: For queries based on time (e.g., finding impressions or clicks within a range), a change in schema—such as introducing clustering on time—could be beneficial.
+The primary key is designed with `requestid` as the partition key to ensure each ad event is uniquely identifiable and evenly distributed across the cluster. This design prevents data hotspots, enabling balanced load distribution and optimizing both read and write performance.
+
+**How it affects the application:**
+
+Using `requestid` as the partition key allows Cassandra to distribute data uniformly, which is essential for maintaining high write throughput and low latency. This setup supports AdVibe’s requirement for handling a vast number of concurrent ad impressions and clicks, ensuring that the system remains responsive and efficient under heavy load.
 
 ---
 
 ## Bloom Filter Configuration
 
-### Setting: `bloom_filter_fp_chance = 0.001`
+### Bloom Filter False Positive Rate: `bloom_filter_fp_chance = 0.001`
 
-#### Decision
+**Why this configuration was chosen:**
 
-We set the Bloom filter false positive rate to 0.1% (0.001) to minimize unnecessary disk reads and optimize memory usage.
+A Bloom filter false positive rate of 0.1% was selected to minimize unnecessary disk I/O operations. This low false positive rate ensures that the Bloom filters effectively reduce the number of disk accesses for non-existent keys, enhancing read performance without consuming excessive memory.
 
-#### Rationale
+**How it affects the application:**
 
-1. **Reducing Disk I/O**: A low false positive rate ensures efficient reads by reducing the likelihood of unnecessary disk access, thus boosting performance.
-2. **Memory Considerations**: Although this configuration increases memory usage, the trade-off is beneficial for our read-heavy scenarios.
-
-#### Example Calculations
-
-To estimate Bloom filter memory usage, let’s consider a scenario where **1 million unique `requestid`s** are generated per second and SSTables flush every **10 minutes**.
-
-- **Total Keys per SSTable**: $1,000,000 \times 600 = 600,000,000$ keys
-- **Bloom Filter Size**:
-  $$
-  m = -\frac{n \times \ln(\text{FPR})}{(\ln 2)^2} \approx 8,657,399,000 \text{ bits} \approx 1,082 \text{ MB}
-  $$
-- **Number of Hash Functions**:
-  $$
-  k = \frac{m}{n} \ln 2 \approx 10 \text{ hash functions}
-  $$
-
-This configuration results in roughly 1 GB per SSTable, fitting well within our memory allocation limits.
-
-#### Considerations
-
-Monitoring memory usage is critical; if we approach our memory limit, adjusting `bloom_filter_fp_chance` to a slightly higher value can help balance memory use and performance.
+Maintaining a low false positive rate means that fewer unnecessary disk reads occur, which optimizes read performance and reduces latency. For AdVibe’s real-time analytics, this configuration ensures that data retrieval is both swift and efficient, supporting the platform's high-performance requirements.
 
 ---
 
 ## Read Repair Configuration
 
-### Setting: `read_repair_chance = 0.05`
+### Read Repair Chance: `read_repair_chance = 0.05`
 
-#### Decision
+**Why this configuration was chosen:**
 
-We configured a read repair chance of 5% to balance consistency with read latency.
+Setting a read repair chance of 5% allows Cassandra to periodically check and correct inconsistencies between replicas during read operations. This ensures data integrity without imposing significant overhead on the system.
 
-#### Rationale
+**How it affects the application:**
 
-1. **Consistency Assurance**: Read repair corrects inconsistencies during reads, which can be critical in a distributed environment where transient failures are possible.
-2. **Minimal Latency Impact**: Setting it at 5% keeps the impact on read performance minimal, avoiding excessive load on nodes.
-
-#### Considerations
-
-- **Write-Heavy Optimization**: Since AdVibe is write-intensive, we avoid high read repair rates to ensure read latency remains low.
-- **Consistency Control**: By relying on `LOCAL_QUORUM` for writes, we achieve a higher baseline of consistency, reducing dependency on read repairs.
+A 5% read repair chance ensures that data remains consistent across replicas, which is vital for maintaining accurate real-time analytics. This configuration helps prevent stale or inconsistent data from being served to users, thereby enhancing the reliability of AdVibe’s reporting and analytics functionalities.
 
 ---
 
 ## Compaction Strategy
 
-### Setting: `TimeWindowCompactionStrategy` with a 1-hour window
+### Compaction Strategy: `TimeWindowCompactionStrategy` with 1-Hour Window
 
-#### Decision
+**Why this configuration was chosen:**
 
-We implemented `TimeWindowCompactionStrategy` (TWCS) with a one-hour window to optimize compaction for time-series data.
+Implementing `TimeWindowCompactionStrategy` (TWCS) with a one-hour window optimizes the compaction process for time-series data, which aligns with AdVibe’s ad event logging pattern. TWCS groups SSTables into hourly buckets, making compaction more efficient and tailored to the temporal nature of the data.
 
-#### Rationale
+**How it affects the application:**
 
-1. **Efficiency with Time-Series Data**: TWCS is ideal for time-ordered, mostly immutable data, which matches our ad event logging pattern.
-2. **Efficient Expiration Handling**: If we decide to use TTL, TWCS will handle expired data gracefully by dropping old SSTables instead of compacting them unnecessarily.
-
-#### Considerations
-
-- **Write Patterns**: Our primary workload involves inserting events, with occasional updates for clicks.
-- **Data Retention**: Should we choose to retain data for a limited period, TWCS will optimize this by removing expired SSTables without the need for manual cleanup.
+This strategy enhances write performance by reducing write amplification and managing SSTable sizes effectively. It ensures that data remains organized chronologically, which is beneficial for time-based queries and analytics. For AdVibe, TWCS supports high write throughput and simplifies data retention policies by allowing easy expiration of outdated SSTables.
 
 ---
 
-## Cluster Configuration
+## Caching Configuration
 
-### Data Center: `datacenter1`
+### Key Cache Size: `key_cache_size = 100MiB`
 
-#### Decision
+**Why this configuration was chosen:**
 
-Named the data center as `datacenter1` to align with application configurations and simplify operations.
+Allocating 100MiB to the key cache improves read performance by storing frequently accessed keys in memory. This reduces the need for disk seeks, enabling faster data retrieval and enhancing the overall responsiveness of the system.
 
-#### Rationale
+**How it affects the application:**
 
-- **Driver Optimization**: By matching the Cassandra data center name with the application’s local-datacenter configuration, we ensure that the driver optimally routes requests within the local data center, reducing cross-region latency.
-
----
-
-### Authentication and Authorization
-
-**Settings**:
-
-- `CASSANDRA_AUTHENTICATOR=AllowAllAuthenticator`
-- `CASSANDRA_AUTHORIZER=AllowAllAuthorizer`
-
-#### Decision
-
-Disabled authentication and authorization for the development environment to prioritize ease of access.
-
-#### Rationale
-
-1. **Development Focus**: Without the burden of credentials, development and testing can proceed unencumbered by security layers.
-2. **Simplified Testing**: In development, faster access without managing permissions allows a focus on application logic.
-
-#### Considerations
-
-- **Security**: These settings are strictly for development. In production, we’ll enable secure authenticator and authorizer configurations.
-- **Environment Segregation**: Ensuring that these settings apply only in non-production environments is critical to prevent security lapses.
+A well-sized key cache accelerates read operations by minimizing disk I/O, which is crucial for AdVibe’s real-time data access requirements. This configuration ensures that the most commonly accessed keys are readily available in memory, thereby improving the efficiency of real-time queries and reducing latency.
 
 ---
 
-### Remote Connection Enablement
+## Hinted Handoff Configuration
 
-**Setting**: `CASSANDRA_ENABLE_REMOTE_CONNECTIONS=true`
+### Hinted Handoff Enabled: `hinted_handoff_enabled = true`
 
-#### Decision
+**Why this configuration was chosen:**
 
-Enabled remote connections to allow flexibility in testing scenarios.
+Enabling hinted handoff ensures that write operations are not lost during transient node outages. When a node becomes temporarily unavailable, hints are stored and replayed once the node recovers, maintaining data consistency across the cluster.
 
-#### Rationale
+**How it affects the application:**
 
-- **Development Convenience**: This allows the application to run on the host while Cassandra is inside Docker, simplifying setup.
-- **Enhanced Testing**: Permits integration testing, debugging, and remote access without reconfiguration.
+This feature enhances fault tolerance by ensuring that write operations are eventually propagated to all replicas, even if some nodes are temporarily down. For AdVibe, this means that ad event data remains consistent and reliable, preventing data loss and ensuring that analytics remain accurate and comprehensive.
 
-#### Considerations
+### Maximum Hint Window: `max_hint_window = 3h`
 
-- **Network Security**: For production, remote connections should be restricted to trusted networks.
-- **Firewall Rules**: Port `9042` must be accessible from the application host for remote connections to function.
+**Why this configuration was chosen:**
 
----
+Setting the maximum hint window to 3 hours provides a sufficient timeframe for temporarily unavailable nodes to recover and receive their hints. This window accommodates typical transient outages without overloading the system with stale hints.
 
-## Application Configuration
+**How it affects the application:**
 
-### Contact Points and Data Center
+A 3-hour window ensures that hints are delivered promptly once nodes are back online, maintaining data consistency without overwhelming the system. For AdVibe, this means that the system can recover quickly from temporary disruptions, ensuring continuous and reliable data processing.
 
-#### Decision
+### Maximum Hints Delivery Threads: `max_hints_delivery_threads = 4`
 
-Set `127.0.0.1` as the contact point and aligned the local data center with Cassandra’s `datacenter1` setting.
+**Why this configuration was chosen:**
 
-#### Rationale
+Allocating 4 threads for hints delivery accelerates the process of replaying stored hints once nodes recover. This ensures that data consistency is restored swiftly, minimizing the window during which data may be missing or outdated.
 
-1. **Local Development Setup**: Since the application and Cassandra are typically co-located on the same machine or Docker network, this configuration streamlines connectivity.
-2. **Consistency Across Services**: Using the same data center name across application and database improves routing accuracy and reduces connection errors.
+**How it affects the application:**
 
-#### Considerations
-
-- **Docker Networking**: If the application runs inside Docker, the contact points might require adjustment, for instance, using the `cassandra` service name.
-- **Scaling Up**: In production, multiple contact points or a load balancer might be needed to handle distributed workloads.
+By increasing the number of delivery threads, AdVibe can handle the replay of hints more efficiently, reducing the time required to synchronize data across the cluster after a node recovery. This enhances the overall responsiveness and reliability of the system, ensuring that real-time data processing remains uninterrupted.
 
 ---
 
-## Kafka Configuration (Briefly)
+## Security Configuration
 
-While not a primary focus, we’ve configured Kafka for message handling:
+### Authenticator: `PasswordAuthenticator`
 
-- **Bootstrap Servers**: `127.0.0.1:9092`
-- **Consumer Group ID**: `advibe-consumer-group`
-- **JSON Serialization**: Configured Kafka to process JSON payloads seamlessly.
+**Why this configuration was chosen:**
 
-#### Considerations
+Implementing `PasswordAuthenticator` enforces user authentication through username and password pairs, enhancing the security of AdVibe’s Cassandra cluster by ensuring that only authorized users can access and manipulate data.
 
-- **Dependencies**: Kafka availability is vital since AdVibe relies on it for event-driven data flows.
-- **Port Configuration**: Exposing Kafka’s ports facilitates testing across environments.
+**How it affects the application:**
+
+This setting restricts access to the database, preventing unauthorized interactions and safeguarding sensitive ad event data. For AdVibe, which handles potentially sensitive user interactions, maintaining strict access controls is essential for data privacy and compliance with security standards.
+
+### Authorizer: `CassandraAuthorizer`
+
+**Why this configuration was chosen:**
+
+Selecting `CassandraAuthorizer` enables detailed permission management, allowing administrators to define precise access controls for different users and roles within the Cassandra cluster.
+
+**How it affects the application:**
+
+This configuration ensures that users have appropriate permissions for their roles, preventing unauthorized data access and modifications. For AdVibe, this means that only designated personnel can perform critical operations, maintaining the integrity and security of the data processing workflows.
 
 ---
 
-## Docker Compose Setup
+## Networking Configuration
 
-### Cassandra Service
+### Snitch: `GossipingPropertyFileSnitch`
 
-Configured with Bitnami’s Cassandra image to simplify deployment:
+**Why this configuration was chosen:**
 
+Using `GossipingPropertyFileSnitch` allows Cassandra to dynamically adapt to network topology changes, ensuring efficient data routing and replication strategies tailored to AdVibe's distributed setup.
 
-#### Highlights
+**How it affects the application:**
 
-- **Volume Mounts**: Persisted data and init scripts streamline data storage and setup.
-- **Environment Variables**: Easily adaptable to different configurations (e.g., dev vs. prod).
+This snitch provides Cassandra with up-to-date information about the network topology, which optimizes replica placement and data locality. For AdVibe, this means reduced latency and improved performance, as data is stored and accessed in the most efficient manner possible within the cluster.
 
-#### Rationale
+### Listen Address: `<node_ip_address>`
 
-1. **Ease of Setup**: Bitnami’s image provides a reliable, well-maintained base.
-2. **Consistency**: The Docker setup ensures that development closely mirrors production configurations.
+**Why this configuration was chosen:**
 
-#### Considerations
+Binding Cassandra to the specific node IP address ensures clear and secure communication within the AdVibe cluster, preventing unintended network interactions and ensuring that all nodes communicate correctly.
 
-- **Health Checks**: Monitoring Cassandra readiness before application initialization is crucial for a smooth startup.
-- **Maintenance**: Automating schema and keyspace creation through mounted `init-scripts` simplifies deployment but may require adjustments for
+**How it affects the application:**
+
+Setting the `listen_address` to the node's IP guarantees that Cassandra nodes can discover and communicate with each other reliably. This is crucial for maintaining cluster health and ensuring that data replication and consistency mechanisms function as intended, supporting AdVibe’s real-time processing requirements.
+
+### RPC Address: `<node_ip_address>`
+
+**Why this configuration was chosen:**
+
+Configuring the RPC address to the node's IP allows AdVibe’s application to connect directly and securely to the Cassandra instance, facilitating efficient client-server communication.
+
+**How it affects the application:**
+
+By setting the `rpc_address` to the correct IP, clients can establish stable and secure connections to the Cassandra cluster. This ensures that AdVibe’s application can reliably perform read and write operations, maintaining the system’s responsiveness and data integrity.
+
+### Native Transport Port: `9042`
+
+**Why this configuration was chosen:**
+
+Maintaining the default native transport port ensures compatibility with standard CQL clients used by AdVibe, streamlining client integration and connectivity.
+
+**How it affects the application:**
+
+Using the default port simplifies the configuration process and avoids potential conflicts with other services. It ensures that AdVibe’s application can seamlessly communicate with Cassandra, leveraging existing tools and libraries without additional configuration overhead.
+
+---
+
+## Conclusion
+
+Once the issue with mounting the `cassandra.yaml` file is resolved, applying these configurations will establish a robust and efficient Cassandra cluster that supports AdVibe’s operational needs. Ensuring that these settings are correctly implemented will provide a solid foundation for maintaining data integrity, optimizing performance, and scaling the system as AdVibe continues to grow.
+
