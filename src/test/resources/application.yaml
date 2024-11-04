@@ -24,13 +24,13 @@ spring:
 
 ad-interaction:
   modeling:
-    clickThroughRate: 70           # Percentage chance a user clicks an ad
-    meanClickTime: 5000            # Average time in milliseconds before a user clicks
-    stdClickTime: 1500             # Standard deviation of click time in milliseconds
-    clickTimeShape: 1.5            # Shape parameter for Weibull distribution
-    clickTimeScale: 6000           # Scale parameter for Weibull distribution
-    impressionArrivalRatio: 0.85   # Ratio for impression delivery
-    clickArrivalRatio: 0.75        # Ratio for click delivery
+    clickThroughRate: 1            # Percentage chance a user clicks an ad
+    meanClickTime: 3000            # Average time in milliseconds before a user clicks
+    stdClickTime: 1000             # Standard deviation of click time in milliseconds
+    clickTimeShape: 1.2            # Shape parameter for Weibull distribution
+    clickTimeScale: 4000           # Scale parameter for Weibull distribution
+    impressionArrivalRatio: 0.99   # Ratio for impression delivery reliability
+    clickArrivalRatio: 0.95        # Ratio for click delivery reliability
   publishing:
     eventDispatchScheduleRunningIntervalMillis: 1000
     eventScheduledForDispatchCount: 10
