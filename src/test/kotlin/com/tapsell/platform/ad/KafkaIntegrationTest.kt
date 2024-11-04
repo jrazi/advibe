@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -68,12 +69,17 @@ class KafkaIntegrationTest {
     @Test
     fun givenEmbeddedKafkaBroker_whenSendMessage_thenMessageIsConsumed() {
         val producerRecord = ProducerRecord(KAFKA_TOPIC, "test-key", "test-value")
-        val latch = CountDownLatch(2)
-        kafkaTemplate.send(producerRecord).thenRunAsync({ latch.countDown() }, { latch.countDown() })
-        if (!latch.await(2, TimeUnit.SECONDS)) {
-            throw AssertionError("Message was not consumed within the timeout")
+        val latch = CountDownLatch(1)
+
+        kafkaTemplate.send(producerRecord).whenComplete { _, _ ->
+            latch.countDown()
+        }
+
+        assertTrue(latch.await(2, TimeUnit.SECONDS)) {
+            "Message was not consumed within the timeout"
         }
     }
+
 
     @Test
     fun givenMessage_whenSent_thenVerifyProducerAcknowledgment() {

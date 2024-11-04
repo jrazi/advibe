@@ -13,7 +13,7 @@ The service consumes these events from **Kafka** and stores them in **Cassandra*
 - **Real-time processing**: Ensures quick and efficient merging of events.
 
 ## Technology Stack
-- **Kotlin** (1.9.25)
+- **Kotlin** (2.0)
 - **Spring Boot** (3.3.4)
 - **Kafka** for message queuing
 - **Cassandra 5.0** for distributed storage
