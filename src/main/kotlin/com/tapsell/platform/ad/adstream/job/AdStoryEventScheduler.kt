@@ -1,4 +1,4 @@
-package com.tapsell.platform.ad.adstream
+package com.tapsell.platform.ad.adstream.job
 
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
 import com.tapsell.platform.ad.contract.dto.AdEventDto

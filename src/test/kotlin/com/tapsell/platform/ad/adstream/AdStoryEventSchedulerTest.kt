@@ -1,5 +1,6 @@
 package com.tapsell.platform.ad.adstream
 
+import com.tapsell.platform.ad.adstream.job.AdStoryEventScheduler
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
 import com.tapsell.platform.ad.contract.dto.ClickEventDto
 import com.tapsell.platform.ad.contract.dto.ImpressionEventDto
