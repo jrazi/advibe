@@ -1,6 +1,5 @@
-package com.tapsell.platform.ad.adstream.interaction
+package com.tapsell.platform.ad.adstream.interaction.factory
 
-import com.tapsell.platform.ad.adstream.interaction.factory.AdInteractionStoryFactory
 import com.tapsell.platform.ad.adstream.interaction.props.AdInteractionModelingProperties
 import com.tapsell.platform.ad.adstream.model.AdInteractionStory
 import org.junit.jupiter.api.Test

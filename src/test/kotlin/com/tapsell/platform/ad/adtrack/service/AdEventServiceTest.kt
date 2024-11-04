@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.time.Instant
 
-@SpringBootTest
 class AdEventServiceTest {
 
     private lateinit var adEventService: AdEventService

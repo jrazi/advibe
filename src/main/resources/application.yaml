@@ -25,7 +25,7 @@ spring:
     port: ${CASSANDRA_PORT:9042}
     keyspace-name: ${CASSANDRA_KEYSPACE:advibe_keyspace}
     local-datacenter: datacenter1
-    schema-action: NONE
+    schema-action: CREATE_IF_NOT_EXISTS
     username: ${CASSANDRA_USERNAME:cassandra}
     password: ${CASSANDRA_PASSWORD:cassandra}
     connection:

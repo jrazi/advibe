@@ -14,10 +14,10 @@ class ImpressionEventFactory : EventFactory<ImpressionEventDto> {
         val impression = ImpressionEventDto(
             requestId = UUID.randomUUID().toString().substring(2),
             adId = UUID.randomUUID().toString().substring(8),
-            adTitle = Locale.IsoCountryCode.values().random().toString() + ' ' + Random.nextLong().toString(8),
+            adTitle = Locale.IsoCountryCode.entries.toTypedArray().random().toString() + ' ' + Random.nextLong().toString(8),
             advertiserCost = (Random.nextFloat() * 1_000_000_000L).toDouble(),
             appId = "TS" + Random.nextBytes(8).asSequence(),
-            appTitle = Platform.CPU.values().random().name,
+            appTitle = Platform.CPU.entries.toTypedArray().random().name,
             impressionTime = Instant.now().toEpochMilli()
         )
         return impression
