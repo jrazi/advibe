@@ -37,7 +37,7 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
 
 management:
   endpoints:
@@ -45,14 +45,8 @@ management:
       exposure:
         include: "*"
   health:
-    kafka:
-      enabled: true
     cassandra:
       enabled: true
-  prometheus:
-    metrics:
-      export:
-        enabled: true
 
 logging:
   level:
@@ -70,5 +64,5 @@ ad-interaction:
     impressionArrivalRatio: 0.85   # Ratio for impression delivery
     clickArrivalRatio: 0.75        # Ratio for click delivery
   publishing:
-    eventDispatchScheduleRunningIntervalMillis: 1000
-    eventScheduledForDispatchCount: 10
+    eventDispatchScheduleRunningIntervalMillis: 5000
+    eventScheduledForDispatchCount: 1
